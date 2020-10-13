@@ -18,19 +18,22 @@ app = Flask(__name__)
 # Database Setup
 #################################################
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get('DATABASE_URL', '') or "sqlite:///db/bellybutton.sqlite"
-db = SQLAlchemy(app)
+engine = create_engine(f"sqlite:///samples.db")
 
 # reflect an existing database into a new model
 Base = automap_base()
+
 # reflect the tables
-Base.prepare(db.engine, reflect=True)
+Base.prepare(engine, reflect=True)
 
 # Save references to each table
 Samples_Metadata = Base.classes.sample_metadata
 Samples = Base.classes.samples
 
+# Flask Setup
+app=Flask(__name__)
 
+# Flask Routes
 @app.route("/")
 def index():
     """Return the homepage."""
@@ -39,7 +42,7 @@ def index():
 
 @app.route("/names")
 def names():
-    """Return a list of sample names."""
+    """Return a list of sample names"""
 
     # Use Pandas to perform the sql query
     stmt = db.session.query(Samples).statement
