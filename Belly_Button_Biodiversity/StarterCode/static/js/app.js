@@ -8,11 +8,12 @@ function buildPlot(sample) {
         // Use d3 to   set  location for bar  chart
         var  barLocation = d3.select("#bar");
 
-        // Filter data for object with corresponding sampke number
+        // Filter data for object with corresponding sample number
         var resultArray = samples.filter(sampleObject => sampleObject.id == sample);
         var result  = resultArray[0];
         var otu_ids = result.otu_ids;
-        var otu_labels = result.sample_values;
+        var otu_labels = result.otu_labels
+        sample_values=result.sample_values;
 
         // Build horizontal bar chart
         var yticks = otu_ids.slice(0,10).map(outID => `OTU ${outID}`).reverse();
@@ -42,7 +43,7 @@ function buildPlot(sample) {
         Plotly.newPlot("bar", barData, barLayout, barLocation);
 
         //  Build the Bubble Chart
-        d3.json(samples).then((data) => {
+        d3.json("samples.json").then((data) => {
             var bubble_loc = d3.select("#bubble")
 
             // Create bubble chart trace
@@ -74,20 +75,19 @@ function buildPlot(sample) {
 
         });
 
-    }
-}
+    })}
 // Display the individual demographic information - sample metadata
 // Display key-value pair from metadata json object somewhere  on the page
 
 function buildMetada(sample) {
 
-    // Get metadat from samples.json
+    // Get metadata from samples.json
     d3.json("samples.json").then((data) => {
         var meta_data = data.metadata;
 
         // Filter and use d3.select to assign metadata side panell variablle
 
-        var resultArray = metadata.filter(sampleObject => sampleObject.id == sample);
+        var resultArray = meta_data.filter(sampleObject => sampleObject.id == sample);
         var result = resultArray[0];
         var meta_panel = d3.select("#sample-metadata");
 
@@ -95,13 +95,13 @@ function buildMetada(sample) {
         meta_panel.html("");
 
         // Use Object.enteries to loop through data and append each key-value pair to the metadata panel side
-        Object.defineProperties(result).forEach(([key, value]) => {
+        Object.entries(result).forEach(([key, value]) => {
             meta_panel.append("h5").text(`${key}: ${value}`);
 
         }
         );
         //  Build Gauge Chart
-        buildgauge(results.wfreq);
+        // buildgauge(results.wfreq);
 
         var guageData = [
             {
@@ -120,9 +120,10 @@ function buildMetada(sample) {
                     threshold: {
                         line: {color: "red", width: 4},
                         thickness: 0.75,
-                        value: 9
+ },
+                       value: 9
                     }
-                }
+                
             }
         ];
 
@@ -146,8 +147,7 @@ function init() {
             .append("option")
             .text(sample)
             .property("value", sample);
-    }
-    );
+    });
 
     // Build default/initial plots using first sample from the list
     defaultSample = sampleNames[0];
@@ -158,7 +158,7 @@ function init() {
 }
 // Create function for change event
 
-funtion optionChanged(newSample) {
+function optionChanged(newSample) {
 
     // Get new data each time a new sample is selected
     buildPlot(newSample);
